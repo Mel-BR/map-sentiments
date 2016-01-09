@@ -1,11 +1,11 @@
 //Width and height
 var w = 700;
-var h = 400;
+var h = w/2;
 
 //Define map projection
 var projection = d3.geo.albersUsa()
                        .translate([w/2, h/2])
-                       .scale([700]);
+                       .scale([w]);
 
 //Define default path generator
 var path = d3.geo.path()
@@ -18,7 +18,7 @@ var color = d3.scale.linear()
                     //Colors taken from colorbrewer.js, included in the D3 download
 
 //Create SVG element
-var svg = d3.select("body")
+var svg = d3.select("#map")
             .append("svg")
             .attr("width", w)
             .attr("height", h);
