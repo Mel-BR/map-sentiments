@@ -1,22 +1,18 @@
-from django.template.loader import get_template	
-from django.shortcuts import render
-from django.http import JsonResponse
 from django.http import HttpResponse
 from sentiments.models import Letter, State, Tweet
 from django.db.models import Avg
-from django.utils.encoding import smart_unicode
-from django.core import serializers
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 from collections import defaultdict
 from TwitterAPI import TwitterAPI
 from alchemyapi import AlchemyAPI
-from sys import argv
 import csv
 import json
 import os
 
 
 def d3States(request):
-    return render(request, 'd3-SentAna.html', {})
+    return render_to_response("sentiments/d3-SentAna.html", context_instance=RequestContext(request))
 
 
 def loadStates(request):
