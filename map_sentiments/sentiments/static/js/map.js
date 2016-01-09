@@ -1,34 +1,62 @@
-//Width and height
-var w = 700;
-var h = w/2;
-
-//Define map projection
-var projection = d3.geo.albersUsa()
-                       .translate([w/2, h/2])
-                       .scale([w]);
-
-//Define default path generator
-var path = d3.geo.path()
-                    .projection(projection);
+// Refresh size of the map
+d3.select(window).on('resize', function(){ update(1);});
 
 
+// Var declaration
+var w;
+var h;
+var projection;
+var path;
+var svg;
 //Define quantize scale to sort data values into buckets of color
 var color = d3.scale.linear()
-                    .range(['rgb(252,141,89)','rgb(255,255,191)','rgb(145,207,96)']);
-                    //Colors taken from colorbrewer.js, included in the D3 download
-
-//Create SVG element
-var svg = d3.select("#map")
-            .append("svg")
-            .attr("width", w)
-            .attr("height", h);
+            .range(['rgb(252,141,89)','rgb(255,255,191)','rgb(145,207,96)']);
+            //Colors taken from colorbrewer.js, included in the D3 download
 
 
-// declare your variable for the setInterval so that you can clear it later
+update(1);
+
+// Interval to refresh data
 var myInterval;
 
 // set your interval
-myInterval = setInterval(updateData,2000);
+myInterval = setInterval(function(){ update(0); },2000);
+
+function update(resize) {
+
+    if (resize==1){
+        console.log(resize);
+        newWidth = parseInt(d3.select('#map').style('width'), 10);
+
+        //Width and height
+        w = newWidth;
+        h = w/2;
+
+        d3.select("#map").attr("width", w)
+                         .attr("height", h);
+
+        d3.select("svg").remove();
+
+        //Define map projection
+        projection = d3.geo.albersUsa()
+                               .translate([w/2, h/2])
+                               .scale([w]);
+
+        //Define default path generator
+        path = d3.geo.path()
+                           .projection(projection);
+
+        //Create SVG element
+        svg = d3.select("#map")
+                    .append("svg")
+                    .attr("width", w)
+                    .attr("height", h);
+
+    }
+
+    updateData();
+
+}
 
 function updateData(){
 
