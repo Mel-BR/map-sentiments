@@ -6,6 +6,7 @@ from django.template import RequestContext
 from collections import defaultdict
 from TwitterAPI import TwitterAPI
 from alchemyapi import AlchemyAPI
+from django.contrib.staticfiles.templatetags.staticfiles import static
 import csv
 import json
 import os
@@ -75,53 +76,55 @@ def getScore(text):
 
 def streamTweets(request):
 
-	path = (os.path.dirname(os.path.dirname(os.path.realpath(__file__)))+"\\files\\access.json").replace('\\','/')
 
-	with open(path) as f:
+    path = (os.path.dirname(os.path.dirname(os.path.realpath(__file__)))+"\\files\\access.json").replace('\\','/')
+    #url = static('/sentiments/us-states.json')
+
+    with open(path) as f:
 		data = json.load(f)
 		ACCESS_TOKEN_KEY = data['ACCESS_TOKEN_KEY']
 		ACCESS_TOKEN_SECRET = data['ACCESS_TOKEN_SECRET']
 		CONSUMER_KEY = data['CONSUMER_KEY']
 		CONSUMER_SECRET = data['CONSUMER_SECRET']
 
-	api = TwitterAPI(CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN_KEY,ACCESS_TOKEN_SECRET)
+    api = TwitterAPI(CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN_KEY,ACCESS_TOKEN_SECRET)
 
-	SEARCH_TERM = 'trump'
-	lang = 'en'
-	geocode = "37.6,-95.665,1400mi"
+    SEARCH_TERM = 'trump'
+    lang = 'en'
+    geocode = "37.6,-95.665,1400mi"
 	
-	while True:
-		try:
-			iterator = api.request('statuses/filter', {'lang': lang, 'track': SEARCH_TERM, 'geocode': geocode}). get_iterator()
-			for item in iterator:
-				if 'text' in item:
-					print item['text']
-					if item['place'] != None :
-						text = unicode(item['text']).encode('utf-8')
-				    	state = unicode(item['place']['full_name'][-2:]).encode("utf-8")
-				    	score = getScore(text)
-				    	print state, text
-				    	if score > -2:
-				    		queryState = State.objects.filter(abbrev=state)
-			                queryTweet = Tweet.objects.filter(text=text)
+    while True:
+        try:
+            iterator = api.request('statuses/filter', {'lang': lang, 'track': SEARCH_TERM, 'geocode': geocode}). get_iterator()
+            for item in iterator:
+                if 'text' in item:
+                    print item['text']
+                    if item['place'] != None :
+                        text = unicode(item['text']).encode('utf-8')
+                        state = unicode(item['place']['full_name'][-2:]).encode("utf-8")
+                        score = getScore(text)
+                        print state, text
+                        if score > -2:
+                            queryState = State.objects.filter(abbrev=state)
+                            queryTweet = Tweet.objects.filter(text=text)
 
-			                #Check if tweet not already in the Database & if state exists
-			                if queryState.count()>0 and queryTweet.count() == 0 :
-			                	print "added"
-			                	state = queryState[0]
-			                	_, created = Tweet.objects.get_or_create(text=text,state=state,score=score,)
+                            #Check if tweet not already in the Database & if state exists
+                            if queryState.count()>0 and queryTweet.count() == 0 :
+                                print "added"
+                                state = queryState[0]
+                                _, created = Tweet.objects.get_or_create(text=text,state=state,score=score,)
 
 
-				elif ' disconnect' in item:
-					event = item[ ' disconnect' ]
-					if event[ ' code' ] in [ 2, 5, 6, 7]:
-						# something needs to be fixed before re-connecting
-						raise Exception(event[ ' reason' ])
-					else:
-						# temporary interruption, re-try request
-						break
-		except Exception as e:
-			pass
+                elif ' disconnect' in item:
+                    event = item[ ' disconnect' ]
+                    if event[ ' code' ] in [ 2, 5, 6, 7]:
+                        # something needs to be fixed before re-connecting
+                        raise Exception(event[ ' reason' ])
+                    else:
+                        # temporary interruption, re-try request
+                        break
+        except Exception as e:
+            pass
 
 
 def getUsStates(request):
