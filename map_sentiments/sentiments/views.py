@@ -28,36 +28,41 @@ def loadStates(request):
 
 def loadTweets(request):
 
-	jsonReturn=[]
+    jsonReturn=[]
 
-	ACCESS_TOKEN_KEY = "3231436059-BHNAJEnCTnYguU249TUCNbOPcrjVogDZp9dXNGV"
-	ACCESS_TOKEN_SECRET = "jYXp0MOXasbtipbl61xbOETUFqHQ0tBKQzMfE8fH72Oib"
-	CONSUMER_KEY = "dEcILIRHXfpFWmkZgxgEM8r12"
-	CONSUMER_SECRET = "7YriGV4QgBVxpQmojuQN9ImUITWGU2NPiA3SLN4ZoGHzmJlUdp"
+    path = (os.path.dirname(os.path.dirname(os.path.realpath(__file__)))+"\\files\\access.json").replace('\\','/')
+    #url = static('/sentiments/us-states.json')
 
-	api = TwitterAPI(CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN_KEY,ACCESS_TOKEN_SECRET)
+    with open(path) as f:
+        data = json.load(f)
+        ACCESS_TOKEN_KEY = data['ACCESS_TOKEN_KEY']
+        ACCESS_TOKEN_SECRET = data['ACCESS_TOKEN_SECRET']
+        CONSUMER_KEY = data['CONSUMER_KEY']
+        CONSUMER_SECRET = data['CONSUMER_SECRET']
 
-	SEARCH_TERM = 'trump'
-	count = 0
-	lang = 'en'
-	geocode = "37.6,-95.665,1400mi"
+    api = TwitterAPI(CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN_KEY,ACCESS_TOKEN_SECRET)
 
-	r = api.request('search/tweets', {'lang': lang, 'q': SEARCH_TERM, 'count': count, 'geocode': geocode})
-	for item in r:
-	    if item['place'] != None  :
-	    	text = unicode(item['text']).encode('utf-8')
-	    	state = unicode(item['place']['full_name'][-2:]).encode("utf-8")
-	    	score = getScore(text)
-	    	if score > -2:
-	    		queryState = State.objects.filter(abbrev=state)
+    SEARCH_TERM = 'trump'
+    count = 0
+    lang = 'en'
+    geocode = "37.6,-95.665,1400mi"
+
+    r = api.request('search/tweets', {'lang': lang, 'q': SEARCH_TERM, 'count': count, 'geocode': geocode})
+    for item in r:
+        if item['place'] != None  :
+            text = unicode(item['text']).encode('utf-8')
+            state = unicode(item['place']['full_name'][-2:]).encode("utf-8")
+            score = getScore(text)
+            if score > -2:
+                queryState = State.objects.filter(abbrev=state)
                 queryTweet = Tweet.objects.filter(text=text)
 
                 #Check if tweet not already in the Database & if state exists
                 if queryState.count()>0 and queryTweet.count() == 0 :
-                	state = queryState[0]
-                	_, created = Tweet.objects.get_or_create(text=text,state=state,score=score,)
-                	count +=1
-	return HttpResponse("Load successful "+ str(count)+" tweets has been added to the DB")
+                    state = queryState[0]
+                    _, created = Tweet.objects.get_or_create(text=text,state=state,score=score,)
+                    count +=1
+    return HttpResponse("Load successful "+ str(count)+" tweets has been added to the DB")
 
 
 
