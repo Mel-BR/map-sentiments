@@ -10,9 +10,13 @@ var path;
 var svg;
 //Define quantize scale to sort data values into buckets of color
 var color = d3.scale.linear()
+            .domain([-1, 0, 1])
             .range(['rgb(252,141,89)','rgb(255,255,191)','rgb(145,207,96)']);
-            //Colors taken from colorbrewer.js, included in the D3 download
 
+/*var color = d3.scale.linear()
+    .range(["red", "green"])
+    .domain([-1, 1]);
+*/
 
 update(1);
 
@@ -25,7 +29,6 @@ myInterval = setInterval(function(){ update(0); },2000);
 function update(resize) {
 
     if (resize==1){
-        console.log(resize);
         newWidth = parseInt(d3.select('#map').style('width'), 10);
 
         //Width and height
@@ -57,6 +60,19 @@ function update(resize) {
     updateData();
 
 }
+
+var fillState = function(d) {
+                    //Get data value
+                    var value = d.properties.value;
+
+                    if (value) {
+                        //If value exists…
+                        return color(value);
+                    } else {
+                        //If value is undefined…
+                        return "#ccc";
+                    }
+               }
 
 function updateData(){
 
@@ -100,23 +116,19 @@ function updateData(){
             }
 
             //Bind data and create one path per GeoJSON feature
-            svg.selectAll("path")
+            // Update data
+            selection = svg.selectAll("path")
                .data(json.features)
-               .enter()
+               .style("fill", fillState);
+
+            // Add new data that do not have a DOM element "path" available
+            selection.enter()
                .append("path")
                .attr("d", path)
-               .style("fill", function(d) {
-                    //Get data value
-                    var value = d.properties.value;
+               .style("fill", fillState);
 
-                    if (value) {
-                        //If value exists…
-                        return color(value);
-                    } else {
-                        //If value is undefined…
-                        return "#ccc";
-                    }
-               });
+            // Remove old data
+            selection.exit().remove();
 
         });
 

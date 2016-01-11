@@ -115,7 +115,7 @@ def streamTweets(request):
 
                             #Check if tweet not already in the Database & if state exists
                             if queryState.count()>0 and queryTweet.count() == 0 :
-                                print "added"
+                                print "added", queryState
                                 state = queryState[0]
                                 _, created = Tweet.objects.get_or_create(text=text,state=state,score=score,)
 
