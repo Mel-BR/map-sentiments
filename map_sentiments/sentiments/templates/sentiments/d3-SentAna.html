@@ -60,7 +60,11 @@
 			</div>
 			<div class="col-md-2">
 			  <h2>Hashtag selection</h2>
-			  <p> Hashtag </p>
+                <form action="{% url "sentiments.views.d3States" %}" method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="submit" value="Submit" />
+                </form>
 			</div>
 		  </div>
 
@@ -88,8 +92,8 @@
         </script>
 
         <script type="text/javascript">
-            urlScoreByStates = "{% url "sentiments.views.getScoresByStates" %}";
-            urlUsStates = "{% url "sentiments.views.getUsStates" %}";
+            urlScoreByStates = "{% url "sentiments.views.getScoresByStates" htag=hashtag%}";
+            urlUsStates = "{% url "sentiments.views.getUsStates" %}?htag=hashtag";
         </script>
 
         <script type="text/javascript" src="{% static "js\map.js" %}"></script>

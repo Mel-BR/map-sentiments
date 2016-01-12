@@ -7,7 +7,6 @@ urlpatterns = patterns('',
 	url(r'^getUsStates/$', views.getUsStates),
 	url(r'^loadStates/$', views.loadStates),
 	url(r'^loadTweets/$', views.loadTweets),
-	url(r'^getScoresByStates/$', views.getScoresByStates),
-	url(r'^streamTweets/$', views.streamTweets),
+	url(r'^getScoresByStates/(?P<htag>\w*)/$', views.getScoresByStates),
+	url(r'^streamTweets/(?P<htag>\w*)/$', views.streamTweets),
 )
-

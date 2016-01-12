@@ -1,19 +1,33 @@
 from django.http import HttpResponse
-from sentiments.models import Letter, State, Tweet
+from sentiments.models import State, Tweet
 from django.db.models import Avg
+from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from collections import defaultdict
 from TwitterAPI import TwitterAPI
 from alchemyapi import AlchemyAPI
-from django.contrib.staticfiles.templatetags.staticfiles import static
+from sentiments.forms import HashtagForm
 import csv
 import json
 import os
 
 
 def d3States(request):
-    return render_to_response("sentiments/d3-SentAna.html", context_instance=RequestContext(request))
+
+    if request.method == 'POST':
+        form = HashtagForm(request.POST)
+
+        if form.is_valid():
+            hashtag = form.cleaned_data['hashtag']
+            #streamTweets(request, hashtag)
+
+    else:
+        hashtag = "0"
+        form = HashtagForm()
+
+
+    return render(request, "sentiments/d3-SentAna.html", locals())
 
 
 def loadStates(request):
@@ -27,8 +41,6 @@ def loadStates(request):
 
 
 def loadTweets(request):
-
-    jsonReturn=[]
 
     path = (os.path.dirname(os.path.dirname(os.path.realpath(__file__)))+"\\files\\access.json").replace('\\','/')
     #url = static('/sentiments/us-states.json')
@@ -68,8 +80,6 @@ def loadTweets(request):
 
 def getScore(text):
 	alchemyapi = AlchemyAPI()
-	sentiment = [0.0, 0.0]
-	counter = 0
 	score = -10
 
 	response = alchemyapi.sentiment('html', text)
@@ -79,8 +89,7 @@ def getScore(text):
    	return score
 
 
-def streamTweets(request):
-
+def streamTweets(request, htag):
 
     path = (os.path.dirname(os.path.dirname(os.path.realpath(__file__)))+"\\files\\access.json").replace('\\','/')
     #url = static('/sentiments/us-states.json')
@@ -94,7 +103,7 @@ def streamTweets(request):
 
     api = TwitterAPI(CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN_KEY,ACCESS_TOKEN_SECRET)
 
-    SEARCH_TERM = 'trump'
+    SEARCH_TERM = htag
     lang = 'en'
     geocode = "37.6,-95.665,1400mi"
 	
@@ -103,21 +112,24 @@ def streamTweets(request):
             iterator = api.request('statuses/filter', {'lang': lang, 'track': SEARCH_TERM, 'geocode': geocode}). get_iterator()
             for item in iterator:
                 if 'text' in item:
-                    print item['text']
                     if item['place'] != None :
                         text = unicode(item['text']).encode('utf-8')
                         state = unicode(item['place']['full_name'][-2:]).encode("utf-8")
                         score = getScore(text)
-                        print state, text
                         if score > -2:
                             queryState = State.objects.filter(abbrev=state)
                             queryTweet = Tweet.objects.filter(text=text)
 
                             #Check if tweet not already in the Database & if state exists
                             if queryState.count()>0 and queryTweet.count() == 0 :
-                                print "added", queryState
+                                print "added"
+                                print text
+                                print state
+                                print score
+                                print htag
+                                print "\n\n\n"
                                 state = queryState[0]
-                                _, created = Tweet.objects.get_or_create(text=text,state=state,score=score,)
+                                _, created = Tweet.objects.get_or_create(text=text,state=state,score=score,hashtag=htag)
 
 
                 elif ' disconnect' in item:
@@ -140,13 +152,10 @@ def getUsStates(request):
 	return HttpResponse(json.dumps(data), content_type='application/json')
 
 
-
-
-
-def getScoresByStates(request):
+def getScoresByStates(request, htag):
 	jsonReturn=[]
 
-	tweets = Tweet.objects.values('state').annotate(av=Avg('score'))
+	tweets = Tweet.objects.filter(hashtag=htag).values('state').annotate(av=Avg('score'))
 	for tweet in tweets:
 		state_abbrev = tweet['state']
 		state_full_name = State.objects.get(abbrev=state_abbrev).full_name

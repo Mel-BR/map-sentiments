@@ -15,4 +15,4 @@ class Tweet(models.Model):
     score = models.DecimalField(max_digits=5, decimal_places=3)
 
     def __unicode__(self):
-        return self.text
+        return self.text+ "--" +self.state+ "--" +self.score
