@@ -118,7 +118,9 @@ function updateData(){
             //Bind data and create one path per GeoJSON feature
             // Update data
             selection = svg.selectAll("path")
-               .data(json.features)
+               .data(json.features);
+
+            selection.transition()
                .style("fill", fillState);
 
             // Add new data that do not have a DOM element "path" available
