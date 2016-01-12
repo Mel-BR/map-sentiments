@@ -1,11 +1,4 @@
 from django.db import models
- 
-class Letter(models.Model):
-    letter = models.CharField(max_length=1)
-    frequency = models.DecimalField(max_digits=20, decimal_places=5)
- 
-    def __unicode__(self):
-        return self.letter
 
 class State(models.Model):
     abbrev = models.CharField(max_length=5, primary_key=True)
@@ -17,6 +10,7 @@ class State(models.Model):
 
 class Tweet(models.Model):
     text = models.CharField(max_length=150, primary_key=True)
+    hashtag = models.CharField(max_length=150, default="")
     state = models.ForeignKey(State)
     score = models.DecimalField(max_digits=5, decimal_places=3)
 
