@@ -9,14 +9,9 @@ var projection;
 var path;
 var svg;
 //Define quantize scale to sort data values into buckets of color
-var color = d3.scale.linear()
+var color = d3.scale.linear().clamp(true)
             .domain([-1, 0, 1])
             .range(['rgb(252,141,89)','rgb(255,255,191)','rgb(145,207,96)']);
-
-/*var color = d3.scale.linear()
-    .range(["red", "green"])
-    .domain([-1, 1]);
-*/
 
 update(1);
 
@@ -80,10 +75,10 @@ function updateData(){
     d3.json(urlScoreByStates, function(data) {
 
         //Set input domain for color scale
-        color.domain([
+        /*color.domain([
             d3.min(data, function(d) { return d.value; }),
             d3.max(data, function(d) { return d.value; })
-        ]);
+        ]);*/
 
         //Load in GeoJSON data , info : var urlUsStates is set server side
         d3.json(urlUsStates, function(json) {
