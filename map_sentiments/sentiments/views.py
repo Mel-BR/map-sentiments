@@ -20,7 +20,6 @@ def d3States(request):
 
         if form.is_valid():
             hashtag = form.cleaned_data['hashtag']
-            #streamTweets(request, hashtag)
 
     else:
         hashtag = "0"
