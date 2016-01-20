@@ -27,7 +27,7 @@ def d3States(request):
         form = HashtagForm()
 
 
-    return render(request, "sentiments/d3-SentAna.html", locals())
+    return render(request, "sentiments/sentiments-selection-display.html", locals())
 
 
 def loadStates(request):
