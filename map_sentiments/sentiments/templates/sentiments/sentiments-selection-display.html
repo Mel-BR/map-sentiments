@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load staticfiles %}
 
 {% block content %}
 
@@ -17,3 +18,17 @@
 </div>
 
 {% endblock %}
+
+
+{% block import %}
+        <script type="text/javascript">
+            urlScoreByStates = "{% url "sentiments.views.getScoresByStates" htag=hashtag%}";
+            urlUsStates = "{% url "sentiments.views.getUsStates" %}";
+            //console.log("coconuts");
+            //console.log({{hashtag}});
+            urlHtagStream = "{% url "sentiments.views.streamTweets" htag=hashtag%}";
+        </script>
+
+        <script type="text/javascript" src="{% static "js\map.js" %}"></script>
+{% endblock %}
+

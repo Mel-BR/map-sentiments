@@ -82,14 +82,9 @@
             ga('create','UA-XXXXX-X','auto');ga('send','pageview');
         </script>
 
-        <script type="text/javascript">
-            urlScoreByStates = "{% url "sentiments.views.getScoresByStates" htag=hashtag%}";
-            urlUsStates = "{% url "sentiments.views.getUsStates" %}?htag=hashtag";
-        </script>
+        {% block import %}
 
-        <script type="text/javascript" src="{% static "js\map.js" %}"></script>
+        {% endblock %}
 
-        <div id="map">
-        </div>
     </body>
 </html>
