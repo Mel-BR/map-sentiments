@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'sentiments',
+    'core',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -60,7 +61,6 @@ ROOT_URLCONF = 'map_sentiments.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['C:/Users/BR/Desktop/Django-project/map_sentiments/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
